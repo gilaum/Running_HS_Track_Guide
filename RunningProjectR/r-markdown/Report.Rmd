@@ -1,0 +1,154 @@
+---
+title: "Output"
+author: "Tom Alig"
+date: "December 27, 2019"
+output: html_document
+
+---
+
+```{r global, include=FALSE}
+library(here)
+#library(tidyverse)
+#library(lubridate)
+#library(scales)
+#library(hms)
+#library(lm)
+```
+
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+
+```{r setup, include = FALSE}
+#knitr::opts_knit$set(root.dir = '../')
+```
+
+
+```{r load_scripts, include = FALSE}
+
+#source("RunningProjectR/scripts/my_track_scripts.R")
+#source("RunningProjectR/run-all.R/analyses-track.R")
+
+#source("Running/RunningProjectR/scripts/my_track_scripts.R")
+
+################
+# This one works!!
+#source(here::here("RunningProjectR", "scripts", "my_track_scripts.R"))
+################
+
+
+#source(here::here("RunningProjectR", "run-all.R", "analyses-track2.R"))
+source(here::here("RunningProjectR", "analyses-track2.R"))
+
+#source("scripts/my_track_scripts.R")
+#source("run-all.R/analyses-track.R")
+
+#source(here("RunningProjectR", "scripts", "my_track_scripts.R"))
+#source(here("RunningProjectR", "run-all.R", "analyses-track.R"))
+
+#source(here("scripts", "my_track_scripts.R"))
+#source(here("run-all.R", "analyses-track.R"))
+
+#source("C:/Users/TomAlig06.15/Documents/R/Running/RunningProjectR/scripts/my_track_scripts.R")
+
+#source("C:/Users/TomAlig06.15/Documents/R/Running/RunningProjectR/run-all.R/analyses-track.R")
+
+```
+
+
+For `r event`, the data look at those who ran a `r slowest.time` or better. This represents approximately the top 40% of all performances in the `r event`.  
+
+Data compiled from athletic.net. Includes all athletes in the outdoor track seasons in the years 2011 - 2019.  
+
+This project analyzes high school track performances over time, and relates your athlete's performances to historical performances. This is purely math-driven. The data below cannot and does not measure who was injured, who was healthy, who trained well, who trained poorly, who had off-the-track issues, who did not.  
+
+
+## Athlete: `r sn`
+### Grade in 2019-2020: `r grade.2019.20`
+### School: `r hsteam`
+#### Event: `r event`
+
+#### Athlete's best time in `r event` in high school career, by grade:
+
+
+### 1. Overview of `r event` over time:
+
+#### A. Heat Map of performances. Will add up to 100% going across, for each grade level.  
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(HeatMap800f)
+```
+
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(heatmap2)
+```
+
+
+#### B. Mean and Median performances over time, among all thoses who had a `r slowest.time` or better.  
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(median.mean.graph)
+```
+
+#### C. Boxplot distribution of performances over time, among all those who had a `r slowest.time` or better.
+##### The shaded areas for each grade are the middle 50%. A short shaded area means the middle 50% are pretty close to each other; converselty, a tall shaded area means  the middle 50% are spread apart by a lot.  
+##### The lines in the middle of the shaded area show the median
+##### The lines below the shaded area show the distribution of performances in the top 25%
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(boxplot.by.grade)
+```
+
+Distribution  of all performances in `r event` over time:  
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(Histogram.All)
+```
+
+Grade `r last.year.grade` distribution of all performances in `r event`:  
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(Hist.Last.Year)
+```
+
+
+### 2. Improvments
+
+By how much does an athlete improve in the `r event`? This shows historical distribution of improvements from grade to grade:
+
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(improve.dist)
+```
+
+### 3. College Comparisons
+
+#### A. How well did college athletes in `r event` perform when they were in high school? This chart looks at Division 1, Division 2, and Division 3 college athletes and their performances in the `r event` when they were in high school.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(med.hs.times.for.coll.athletes)
+```
+
+
+#### B. All performances of college athletes in `r event` when they were in high school:
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(scatterplot.hs.perf)
+```
+
+#### C. Adding in the Athlete's High School for comparison sake:
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+plot(facet.boxplots)
+```
+
+
+## 4. PREDICTIONS
+
+Based purely on the algorithm. Does not factor in any injury, illness, training, or other factors that may be unique to your athlete.
+
+I hesitate to put predictions into this report. There is enough pressure on high school kids today. They don't need some algorithm boxing them into a certain performance level. There are a million reasons why your athlete may far surpass this prediction. Likewise, there are a million reasons why your athlete may fall short of this prediction. 
+
