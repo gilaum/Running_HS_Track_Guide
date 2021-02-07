@@ -2,7 +2,9 @@
 title: "High School Girls Outdoor 800 Meters"
 author: "Tom Alig"
 date: "February 1, 2021"
-output: html_document
+output:
+      html_document:
+        keep_md: true
 ---
 
 ```{r global, include=FALSE}
