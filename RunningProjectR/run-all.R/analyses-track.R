@@ -13,6 +13,7 @@ library(data.table)
 library(Hmisc)
 library(tools)
 library(ggridges)
+library(gridExtra)
 source("RunningProjectR/scripts/my_track_scripts.R")
 
 #event <- "800m"
@@ -388,6 +389,47 @@ med.hs.line.plot <- chart1.1_df %>%
                 event,
                 "Times"))
 
+
+med.hs.line.plot2 <- chart1.1_df %>% 
+  gather(key = "Type", value = "HSmedian", AthleteTime:median.D3) %>% 
+  select(Grade, Type, HSmedian) %>% 
+  ggplot(aes(x = Grade, y = HSmedian, na.rm = TRUE,
+             color = Type,
+             size = Type == "AthleteTime",
+             group = Type
+  )) +
+  geom_point(size = 3) + 
+  geom_line(size = 2) +
+  scale_x_discrete(limits = c('Gr09', 'Gr10',
+                              'Gr11', 'Gr12'),
+                   labels = c("Gr9", "Gr10", "Gr11", "Gr12")) +
+  scale_y_time(labels = date_format("%M:%S"),
+               name = "Time") +
+  scale_colour_manual(values = cb.six,
+                      limits = c("AthleteTime", 
+                                 "median.D1", 
+                                 "median.D2", "median.D3",
+                                 "median.all.hs",
+                                 "median.hs.team"
+                      ),
+                      labels = c(sn, 
+                                 "D1", "D2", "D3", "All HS Athletes",
+                                 hsteam)
+  ) +
+  scale_size_manual(values = c(1, 3)) +
+  guides(size = FALSE,
+         group = guide_legend(title = NULL)) +
+  theme_bw() +
+  ggtitle(paste(sn,
+                "and Median High School",
+                event,
+                "Times"))
+
+
+
+chart1.1_df %>% 
+  View()
+
 ################################################
 # Inter Quartile Range
 # Table format median high school times for college runners
@@ -556,6 +598,28 @@ heatmap2 <- all.hs.and.coll.data.long %>%
                 years)) +
   guides(fill = FALSE) 
 
+heatmap3 <- all.hs.and.coll.data.long %>% 
+  mutate(HStime2 = as.numeric(all.hs.and.coll.data.long$HStime/60)) %>% 
+  filter(HStime != "NA") %>% 
+  group_by(Grade, gr = cut(HStime2, breaks= breaks)) %>% 
+  tally() %>% 
+  mutate(pct_by_grade = n/sum(n)) %>% 
+  ggplot(aes(x = gr, y = Grade, fill = pct_by_grade)) +
+  geom_tile() +
+  scale_x_discrete(labels = labels,
+                   name = "Time") +
+  scale_fill_distiller(palette = "Blues", direction = +1) +
+  scale_y_discrete(limits = c("Gr9", "Gr10", "Gr11", "Gr12")) +
+  theme_minimal() +
+  geom_text(aes(label = scales::percent(pct_by_grade, accuracy = 0.01))) +
+  theme(axis.text.x = element_text(angle = 30, 
+                                   hjust = 1,
+                                   vjust = 1)) +
+  ggtitle(paste(event2,
+                "Time Distributions",
+                years)) +
+  guides(fill = FALSE) 
+
 
 all.hs.and.coll.data.long %>% 
   filter(Team == hsteam) %>% 
@@ -622,6 +686,55 @@ Histogram.All <- all.hs.and.coll.data.long %>%
        x = "Time") +
   theme_bw()
 
+# Histogram for all HS 800m 2011- 2019 for TWWOTRIC
+Histogram.twwotric <- all.hs.and.coll.data.long %>% 
+  filter(HStime != "NA",
+         Coll.Time != "NA") %>% 
+  ggplot(aes(x = HStime)) +
+  geom_histogram(bins = 18, fill = cb.orange, color = cb.blue) + #18
+  geom_vline(aes(xintercept = ifelse(Athlete == sn, HStime, NA)), 
+             color = "black", 
+             linetype = "dashed", size = 1) + 
+  scale_x_time(labels = time_format("%M:%S")) +
+  scale_y_continuous(labels = comma) +
+  labs(title = paste("All",
+                     event2,
+                     years),
+       subtitle = "Dashed Line = Your Athlete",
+       x = "Time") +
+  theme_bw()
+
+grade.by.grade.dist <- all.hs.and.coll.data.long %>% 
+  filter(HStime != "NA") %>% 
+  ggplot(aes(x = HStime, y = Grade)) +
+  geom_density_ridges(fill = cb.orange,
+                      color = cb.blue) +
+  theme_ridges(font_size = 13, grid = TRUE) +
+  scale_x_time(labels = time_format("%M:%S")) +
+  scale_y_discrete(limits = c("Gr9", "Gr10", "Gr11", "Gr12")) +
+  theme(axis.title.y = element_blank()) +
+  labs(title = paste("Grade Distributions",
+                     event2,
+                     years)) +
+  theme_bw()
+
+
+grade.by.grade.dist.twwotric <- all.hs.and.coll.data.long %>% 
+  filter(HStime != "NA",
+         Coll.Time != "NA",
+         College.Division == "D1") %>% 
+  ggplot(aes(x = HStime, y = Grade)) +
+  geom_density_ridges(fill = cb.blue,
+                      color = cb.orange) +
+  theme_ridges(font_size = 13, grid = TRUE) +
+  scale_x_time(labels = time_format("%M:%S")) +
+  scale_y_discrete(limits = c("Gr9", "Gr10", "Gr11", "Gr12")) +
+  theme(axis.title.y = element_blank()) +
+  labs(title = paste("Grade Distributions",
+                     event2,
+                     years)) +
+  theme_bw()
+
 
 # Histogram for all HS 800m 2011- 2019
 # First, define the breaks
@@ -655,6 +768,16 @@ num.of.participants <- hs.800.one.row %>%
                 ",",
                 years)) +
   theme_bw()
+
+# Count by grade level at target time
+num.of.part9 <- count.by.grade.over.time(hs.800.one.row, 9)
+num.of.part10 <- count.by.grade.over.time(hs.800.one.row, 10)
+num.of.part11 <- count.by.grade.over.time(hs.800.one.row, 11)
+num.of.part12 <- count.by.grade.over.time(hs.800.one.row, 12)
+
+num.of.part.by.grade <- grid.arrange(num.of.part9, num.of.part10, 
+             num.of.part11, num.of.part12,
+             nrow = 2)
 
 
 hs.800.one.row %>% 
@@ -696,6 +819,58 @@ median.mean.barplot <- hs.800.one.row %>%
                      ",",
                      years),
        caption = "Dashed Line = Your Athlete")
+
+mean.time.all.years <- mean(hs.800.one.row$Time)
+mean.time.all.years2 <- round(mean.time.all.years * 60, 2)
+mean.time.all.years3 <- as_hms(mean.time.all.years2)
+
+mean.lineplotting(hs.800.one.row, 120, 165)
+mean.lineplotting(hs.800.one.row, 150, 158)
+
+mean.lineplot <- hs.800.one.row %>% 
+  filter(Grade > 8) %>% 
+  mutate(Grade = as.factor(Grade)) %>% 
+  group_by(year, Grade) %>% 
+  summarise(mean.time = mean(Time)) %>% 
+  mutate(mean2 = round(mean.time * 60, 2)) %>% 
+  gather(mean2, key = "type", value = "timess") %>% 
+  mutate(timess2 = as_hms(timess)) %>%
+  ungroup() %>% 
+  ggplot(aes(x = year, y = timess, na.rm = TRUE,
+             color = Grade,
+             shape = Grade,
+             group = Grade
+  )) +
+  geom_point(size = 2.75) +
+  geom_line(size = 1.33) +
+  geom_hline(aes(yintercept = mean.time.all.years3),
+             linetype = 'dashed',
+             color = "black",
+             size = 1.17) +
+  scale_x_continuous(breaks = seq(2011, 2019, 1)) +
+  coord_cartesian(ylim = c(150, 158)) +
+  scale_y_time(labels = time_format("%M:%S")) +
+  scale_color_manual(values = c("#009E73", cb.blue, cb.orange, cb.purple )#,
+                     #limits = c("9", "10", "11", "12")
+  ) +
+  scale_size_manual(values = c(2, 5)) +
+  scale_shape_manual(values = shapes4,
+                     limits = c("9", "10", "11", "12")
+                     ) +
+  theme_bw() +
+  guides(color = guide_legend(reverse = FALSE)) +
+  xlab("Year") +
+  ylab("Time") +
+  labs(title = paste("Average Times by Grade for", 
+                     event2,
+                     "under",
+                     slowest.time, 
+                     ",",
+                     years),
+       caption = "Dashed Line = Average for All Athletes, All Years")
+
+
+
   
 # All Grade 9 HS times
 blah <- all.hs.and.coll.data.long %>% 

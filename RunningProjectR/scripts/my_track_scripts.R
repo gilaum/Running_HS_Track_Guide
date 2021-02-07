@@ -38,7 +38,7 @@ cb.six <- c("#000000",
             "#56B4E9", "#009E73" )
 
 shapes <- c(19, 8) 
-shapes4 <- c(16, 17, 15, 19)
+shapes4 <- c(16, 17, 15, 18)
 
 
 
@@ -336,6 +336,84 @@ df %>%
 }
 ########################################
 ########################################
+
+mean.lineplotting <- function(df, minlimit, maxlimit) {
+df %>% 
+  filter(Grade > 8) %>% 
+  mutate(Grade = as.factor(Grade)) %>% 
+  group_by(year, Grade) %>% 
+  summarise(mean.time = mean(Time)) %>% 
+  mutate(mean2 = round(mean.time * 60, 2)) %>% 
+  gather(mean2, key = "type", value = "timess") %>% 
+  mutate(timess2 = as_hms(timess)) %>%
+  ungroup() %>% 
+  ggplot(aes(x = year, y = timess, na.rm = TRUE,
+             color = Grade,
+             shape = Grade,
+             group = Grade
+  )) +
+  geom_point(size = 2.75) +
+  geom_line(size = 1.33) +
+  geom_hline(aes(yintercept = mean.time.all.years3),
+             linetype = 'dashed',
+             color = "black",
+             size = 1.17) +
+  scale_x_continuous(breaks = seq(2011, 2019, 1)) +
+  coord_cartesian(ylim = c(minlimit, maxlimit)) +
+  scale_y_time(labels = time_format("%M:%S")) +
+  scale_color_manual(values = c("#009E73", cb.blue, cb.orange, cb.purple )#,
+                     #limits = c("9", "10", "11", "12")
+  ) +
+  scale_size_manual(values = c(2, 5)) +
+  scale_shape_manual(values = shapes4,
+                     limits = c("9", "10", "11", "12")
+  ) +
+  theme_bw() +
+  guides(color = guide_legend(reverse = FALSE)) +
+  xlab("Year") +
+  ylab("Time") +
+  labs(title = paste("Average Times by Grade for", 
+                     event2,
+                     "under",
+                     slowest.time, 
+                     ",",
+                     years),
+       caption = "Dashed Line = Average for All Athletes, All Years")
+
+}
+
+
+
+
+
+
+# Gets bar plots for grade levels
+
+count.by.grade.over.time <- function(df, ggrrade) {
+  df %>% 
+  #hs.800.one.row %>% 
+    filter(Time < 2.76,
+           Grade == ggrrade) %>% 
+    ggplot(aes(x = year)) +
+    geom_bar(fill = cb.orange, color = cb.blue) +
+    coord_cartesian(ylim = c(0, 7500)) +
+    scale_x_continuous(breaks = seq(2011, 2019, 1)) +
+    scale_y_continuous(labels = comma) +
+    ggtitle(paste("Grade",
+                  ggrrade,
+                  "Count of",
+                  event2,
+                  "under",
+                  slowest.time,
+                  ",",
+                  years)) +
+    theme_bw()
+}
+
+
+########################################
+########################################
+
 
 # Gets count of data points for which a prediction was made
 rf.summary <- function(yh, new, dataset){
